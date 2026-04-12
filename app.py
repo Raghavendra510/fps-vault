@@ -141,6 +141,45 @@ def register_user():
         cursor.close()
         conn.close()
 
+@app.route('/api/recommendations/<int:video_id>', methods=['GET'])
+def get_recommendations(video_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # 1. Get all tag IDs for the current video
+        cursor.execute("SELECT tag_id FROM Video_Tag WHERE video_id = %s", (video_id,))
+        tag_ids = [row['tag_id'] for row in cursor.fetchall()]
+
+        if not tag_ids:
+            # Fallback: Just get latest videos if no tags exist
+            cursor.execute("""
+                SELECT v.video_id, v.title, v.thumbnail_url, v.views_count, c.channel_name, c.channel_id,
+                (SELECT COUNT(*) FROM Like_Table WHERE video_id = v.video_id) as likes_cnt
+                FROM Video v JOIN Channel c ON v.channel_id = c.channel_id 
+                WHERE v.video_id != %s LIMIT 15
+            """, (video_id,))
+        else:
+            # 2. Find videos sharing ANY of these tags, diversified
+            format_strings = ','.join(['%s'] * len(tag_ids))
+            query = f"""
+                SELECT DISTINCT v.video_id, v.title, v.thumbnail_url, v.views_count, c.channel_name, c.channel_id,
+                (SELECT COUNT(*) FROM Like_Table WHERE video_id = v.video_id) as likes_cnt
+                FROM Video v
+                JOIN Channel c ON v.channel_id = c.channel_id
+                JOIN Video_Tag vt ON v.video_id = vt.video_id
+                WHERE vt.tag_id IN ({format_strings}) AND v.video_id != %s
+                ORDER BY RAND() -- Diversifies the mix from education, gaming, food, etc.
+                LIMIT 15
+            """
+            cursor.execute(query, tuple(tag_ids + [video_id]))
+        
+        recs = cursor.fetchall()
+        return jsonify(recs), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close(); conn.close()
+        
 @app.route('/api/login', methods=['POST'])
 def login_user():
     # Automatically log in anyone who tries to log in
@@ -371,12 +410,66 @@ def get_channel_data(channel_id):
     conn.close()
     return jsonify(channel)
 
+# 1. Serve the HTML page
+@app.route('/history')
+def history_page():
+    if 'user_id' not in session: return redirect('/login')
+    return render_template('history.html')
+
+# 2. Fetch the user's history
+@app.route('/api/history', methods=['GET'])
+def get_watch_history():
+    if 'user_id' not in session: return jsonify({"error": "Unauthorized"}), 401
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # Notice we are grabbing 'watch_progress' and the video's total 'duration' now!
+        cursor.execute("""
+            SELECT v.video_id, v.title, v.thumbnail_url, v.duration, v.views_count, 
+                   c.channel_name, c.channel_id, h.watch_duration,
+                   DATE_FORMAT(h.watch_timestamp, '%M %d, %Y') as watched_on
+            FROM Watch_History h
+            JOIN Video v ON h.video_id = v.video_id
+            JOIN Channel c ON v.channel_id = c.channel_id
+            WHERE h.user_id = %s
+            ORDER BY h.watch_timestamp DESC
+        """, (session['user_id'],))
+        
+        return jsonify(cursor.fetchall()), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close(); conn.close()
+
+# 3. The "Silent Tracker" that saves video progress
+@app.route('/api/history/progress', methods=['POST'])
+def update_watch_progress():
+    if 'user_id' not in session: return jsonify({"error": "Unauthorized"}), 401
+    
+    data = request.get_json()
+    video_id = data.get('video_id')
+    progress = data.get('progress', 0)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE Watch_History 
+            SET watch_duration = %s 
+            WHERE user_id = %s AND video_id = %s
+        """, (progress, session['user_id'], video_id))
+        conn.commit()
+        return jsonify({"success": True}), 200
+    finally:
+        cursor.close(); conn.close()
+
 @app.route('/api/watch/<int:video_id>', methods=['GET'])
 def get_video_data(video_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # NEW: We added v.drive_link, v.duration, and v.thumbnail_url to the SELECT list!
+    # Notice we don't have an open 'try:' here anymore!
     cursor.execute("""
         SELECT v.video_id, v.title, v.description, v.drive_link, v.thumbnail_url, v.views_count as views_cnt, 
                DATE_FORMAT(v.upload_date, '%M %d, %Y') as upload_date,
@@ -396,17 +489,22 @@ def get_video_data(video_id):
         cursor.execute("SELECT t.tag_name FROM Tag t JOIN Video_Tag vt ON t.tag_id = vt.tag_id WHERE vt.video_id = %s", (video_id,))
         video['tags'] = [t['tag_name'] for t in cursor.fetchall()]
         
-        # NEW: Check if the current logged-in user already liked/subscribed!
+        # Check if the current logged-in user already liked/subscribed
         video['user_liked'] = False
         video['user_subscribed'] = False
         
         if 'user_id' in session:
             user_id = session['user_id']
-            # Did they like it?
+            # Silent Watch History Tracker
+            cursor.execute("""
+                INSERT INTO Watch_History (user_id, video_id) 
+                VALUES (%s, %s) 
+                ON DUPLICATE KEY UPDATE watch_timestamp = CURRENT_TIMESTAMP
+            """, (user_id, video_id))
+
             cursor.execute("SELECT 1 FROM Like_Table WHERE user_id = %s AND video_id = %s", (user_id, video_id))
             video['user_liked'] = bool(cursor.fetchone())
             
-            # Did they subscribe?
             cursor.execute("SELECT 1 FROM Subscription WHERE user_id = %s AND channel_id = %s", (user_id, video['channel_id']))
             video['user_subscribed'] = bool(cursor.fetchone())
 

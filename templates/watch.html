@@ -66,20 +66,18 @@
         <a href="/" style="color: #aaa; text-decoration: none;">← Home</a>
     </nav>
 
-    <div class="watch-container">
+    <div class="watch-container" style="display: flex; gap: 30px; align-items: flex-start; max-width: 1400px;">
+    
+    <div style="flex: 7; min-width: 0;">
         <div id="loading">Loading secure video link...</div>
         
-        <div id="content">
+        <div id="content" style="display: none;">
             <div class="video-player-wrapper" style="position: relative; width: 100%; aspect-ratio: 16/9; background: black; border-radius: 12px; overflow: hidden;">
-    
                 <iframe id="video-iframe" style="width: 100%; height: 100%; border: none; display: none;" allowfullscreen></iframe>
-
                 <div id="video-poster" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; cursor: pointer; display: flex; justify-content: center; align-items: center;">
-                    
                     <div style="width: 70px; height: 50px; background: rgba(229, 9, 20, 0.9); border-radius: 12px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
                         <span style="color: white; font-size: 24px;">▶</span>
                     </div>
-                    
                 </div>
             </div>
 
@@ -89,36 +87,41 @@
                 
                 <div class="stats-row">
                     <div class="views-date"><span id="v-views">0</span> views • <span id="v-date">Date</span></div>
-                    <button id = "like-btn" class="actions-btn">👍 <span id="v-likes">0</span></button>
+                    <button id="like-btn" class="actions-btn">👍 <span id="v-likes">0</span></button>
                 </div>
 
                 <div class="channel-row">
-                    <div class="channel-info">
+                    <div class="channel-info" onclick="window.location.href='/channel/' + currentChannelId" style="cursor: pointer;">
                         <div class="channel-avatar" id="c-avatar">C</div>
                         <div>
                             <p class="channel-name" id="c-name">Channel Name</p>
                             <p class="channel-subs"><span id="c-subs">0</span> subscribers</p>
                         </div>
                     </div>
-                    <button id = "sub-btn" class="btn-subscribe">Subscribe</button>
+                    <button id="sub-btn" class="btn-subscribe">Subscribe</button>
                 </div>
 
                 <div class="description-box" id="v-desc"></div>
+                
                 <div style="margin-top: 40px; border-top: 1px solid #222; padding-top: 20px;">
                     <h3>Comments</h3>
-                    
                     <div id="comment-form-container" style="display: none; margin-bottom: 30px;">
                         <textarea id="new-comment-text" placeholder="Add a public comment..." style="width: 100%; padding: 12px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 8px; margin-bottom: 10px;"></textarea>
                         <button id="submit-comment-btn" class="actions-btn" style="background: #e50914;">Post Comment</button>
                     </div>
                     <div id="login-prompt" style="color: #aaa; margin-bottom: 30px; font-style: italic;">Log in to leave a comment.</div>
-
-                    <div id="comments-list">
-                        </div>
+                    <div id="comments-list"></div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div id="recommendations-sidebar" style="flex: 3; background: #111; padding: 20px; border-radius: 12px; min-width: 300px;">
+        <h3 style="margin-top: 0; color: #fff;">Up Next</h3>
+        <div id="recs-list">
+            </div>
+    </div>
+</div>
 
     <script>
         // Extract the video ID from the URL (e.g., /watch/1 -> 1)
@@ -129,7 +132,8 @@
                 const res = await fetch(`/api/watch/${videoId}`);
                 if (!res.ok) throw new Error("Video not found");
                 const data = await res.json();
-
+                
+                window.currentChannelId = data.channel_id;
                 // 1. Google Drive Link Conversion Magic!
                 // Converts ".../view?usp=sharing" to ".../preview"
                 // --- 1. Set the Video Source ---
@@ -222,6 +226,47 @@
                 
                 await loadComments();
 
+                // --- NEW: RECOMMENDATIONS LOGIC ---
+                async function loadRecommendations() {
+                    const rRes = await fetch(`/api/recommendations/${videoId}`);
+                    const recs = await rRes.json();
+                    const list = document.getElementById('recs-list');
+                    list.innerHTML = '';
+
+                    recs.forEach(v => {
+                        const div = document.createElement('div');
+                        div.style.cssText = "display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start;";
+                        
+                        let thumb = v.thumbnail_url;
+                        if (thumb && thumb.includes('drive.google.com')) {
+                            const match = thumb.match(/[\/?]id=(.*?)(&|$)/) || thumb.match(/\/d\/(.*?)\//);
+                            if (match) thumb = `/api/proxy_thumb/${match[1]}`;
+                        }
+
+                        div.innerHTML = `
+                            <div onclick="window.location.href='/watch/${v.video_id}'" 
+                                style="width: 140px; min-width: 140px; aspect-ratio: 16/9; background-image: url('${thumb}'); background-size: cover; border-radius: 8px; cursor: pointer; position: relative;">
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div onclick="window.location.href='/watch/${v.video_id}'" 
+                                    style="font-size: 14px; font-weight: bold; line-height: 1.3; margin-bottom: 4px; cursor: pointer; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    ${v.title}
+                                </div>
+                                <div onclick="window.location.href='/channel/${v.channel_id}'" 
+                                    style="font-size: 12px; color: #aaa; cursor: pointer; margin-bottom: 2px;">
+                                    ${v.channel_name}
+                                </div>
+                                <div style="font-size: 11px; color: #888;">
+                                    ${v.views_count} views • ${v.likes_cnt} likes
+                                </div>
+                            </div>
+                        `;
+                        list.appendChild(div);
+                    });
+                }
+
+                await loadRecommendations();
+
                 // 3. Handle new comment submission
                 document.getElementById('submit-comment-btn').onclick = async () => {
                     const box = document.getElementById('new-comment-text');
@@ -294,13 +339,33 @@
                         }
                     }
                 };
-            } catch (error) {
-                document.getElementById('loading').innerText = "❌ Video not found or an error occurred.";
-                document.getElementById('loading').style.color = "#e50914";
-            }
+            }  catch (error) {
+                    console.error("DEBUG ERROR:", error); // This will tell us the EXACT line failing in Console
+                    document.getElementById('loading').innerText = "❌ Error: " + error.message;
+                }
         }
 
         loadVideo();
+
+        // --- NEW: DURATION TRACKER ---
+        // Since Google Drive iframes hide the exact video time, we track how many seconds 
+        // the user has kept the video page open and active!
+        let secondsWatched = 0;
+        
+        setInterval(() => {
+            // Only count if the thumbnail is hidden (meaning the video is playing!)
+            const poster = document.getElementById('video-poster');
+            if (poster && poster.style.display === 'none') {
+                secondsWatched += 5; // Add 5 seconds
+                
+                // Ping the backend to save progress
+                fetch('/api/history/progress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ video_id: videoId, progress: secondsWatched })
+                });
+            }
+        }, 5000); // Runs every 5 seconds
     </script>
 </body>
 </html>
