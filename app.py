@@ -745,8 +745,8 @@ def start_playlist(playlist_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        # Get the first video in the playlist
-        cursor.execute("SELECT video_id FROM Playlist_Video WHERE playlist_id = %s ORDER BY added_at ASC LIMIT 1", (playlist_id,))
+        # Just grab the first video ID attached to this playlist!
+        cursor.execute("SELECT video_id FROM Playlist_Video WHERE playlist_id = %s LIMIT 1", (playlist_id,))
         first_video = cursor.fetchone()
         
         if first_video:
