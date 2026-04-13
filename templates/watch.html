@@ -190,6 +190,25 @@
 </div>
 
     <script>
+        // --- SEARCH BAR LOGIC (BULLETPROOF VERSION) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search-input');
+            
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const query = this.value.trim();
+                        if (query) {
+                            window.location.href = '/search?q=' + encodeURIComponent(query);
+                        }
+                    }
+                });
+            } else {
+                // If it still fails, it will yell at us in the console!
+                console.error("DEBUG: Could not find the search bar ID in the HTML!");
+            }
+        });
+        
         // Extract the video ID from the URL (e.g., /watch/1 -> 1)
         const videoId = window.location.pathname.split('/').pop();
 
@@ -581,7 +600,7 @@
                 document.getElementById('loading').innerText = "❌ Error: " + error.message;
             }
         }
-        
+
         loadVideo();
 
         // --- NEW: DURATION TRACKER ---

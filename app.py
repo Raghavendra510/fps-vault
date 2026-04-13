@@ -738,6 +738,29 @@ def get_playlist_videos(playlist_id):
         conn.close()
 
 # ==========================================
+# PLAYLIST HELPER ROUTE
+# ==========================================
+@app.route('/play/playlist/<int:playlist_id>')
+def start_playlist(playlist_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # Get the first video in the playlist
+        cursor.execute("SELECT video_id FROM Playlist_Video WHERE playlist_id = %s ORDER BY added_at ASC LIMIT 1", (playlist_id,))
+        first_video = cursor.fetchone()
+        
+        if first_video:
+            # Redirect to the watch page, but attach the playlist ID so the queue opens!
+            return redirect(f"/watch/{first_video['video_id']}?list={playlist_id}")
+        else:
+            return "Playlist is empty", 404
+    except Exception as e:
+        print(f"PLAYLIST START ERROR: {e}")
+        return str(e), 500
+    finally:
+        cursor.close(); conn.close()
+
+# ==========================================
 # TICKETING & REPORTING APIs
 # ==========================================
 @app.route('/api/report/video', methods=['POST'])
@@ -854,9 +877,19 @@ def resolve_ticket(ticket_id):
     finally:
         cursor.close(); conn.close()
 
+# ==========================================
+# SEARCH APIs
+# ==========================================
+
+# 1. This route loads the visual web page
+@app.route('/search')
+def search_page():
+    return render_template('search.html')
+
+# 2. This route handles the fuzzy AI brain logic
 @app.route('/api/search', methods=['GET'])
 def api_search():
-    q = request.args.get('q', '').strip().lower() # Convert to lowercase for better matching
+    q = request.args.get('q', '').strip().lower() 
     
     if not q:
         return jsonify([]), 200
@@ -864,13 +897,11 @@ def api_search():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        # 1. Cast a wide net! Grab a large batch of active videos
-        # (In a massive app like YouTube, you'd use a dedicated search server like Elasticsearch, 
-        # but for our scale, filtering the top few hundred videos in memory is lightning fast!)
         cursor.execute("""
             SELECT v.video_id, v.title, v.thumbnail_url, v.views_count, 
                    DATE_FORMAT(v.upload_date, '%M %d, %Y') as date,
-                   c.channel_name, c.channel_id
+                   c.channel_name, c.channel_id,
+                   (SELECT COUNT(*) FROM Like_Table WHERE video_id = v.video_id) as likes_cnt
             FROM Video v
             JOIN Channel c ON v.channel_id = c.channel_id
             ORDER BY v.views_count DESC
@@ -878,24 +909,17 @@ def api_search():
         """)
         all_videos = cursor.fetchall()
         
-        # 2. The AI Brain: Score every video based on typo-tolerance
         results = []
         for v in all_videos:
-            # Check how closely the user's text matches the title OR the channel name
             title_score = fuzz.partial_ratio(q, v['title'].lower())
             channel_score = fuzz.partial_ratio(q, v['channel_name'].lower())
-            
-            # Take whichever score is higher
             best_score = max(title_score, channel_score)
             
-            # 3. The Filter: Only keep videos with a score of 60% or higher!
             if best_score >= 60:
-                v['match_score'] = best_score # Save the score so we can rank them
+                v['match_score'] = best_score 
                 results.append(v)
                 
-        # 4. Sort the final list so the 100% perfect matches are at the top, and typos are below them
         results = sorted(results, key=lambda x: x['match_score'], reverse=True)
-        
         return jsonify(results), 200
         
     except Exception as e:

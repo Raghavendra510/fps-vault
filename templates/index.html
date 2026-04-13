@@ -154,8 +154,7 @@
 <body>
     <nav>
         <a href="javascript:void(0)" class="logo" onclick="window.scrollTo(0,0); return false;">FPS<span>-</span>VAULT</a>
-        <div class="search-container"><input type="text" class="search-bar" placeholder="Search live streams, channels, or games..."></div>
-        <div class="nav-links" id="auth-section">
+            <input type="text" id="search-input" placeholder="Search live streams, channels, or games...">        
             <a href="/login" style="color: white; font-weight: bold;">Login</a>
             <a href="/register" style="background: var(--primary); padding: 5px 15px; border-radius: 4px; color: white;">Sign Up</a>
         </div>
@@ -186,6 +185,25 @@
     </div>
 
     <script>
+        // --- SEARCH BAR LOGIC (BULLETPROOF VERSION) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search-input');
+            
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const query = this.value.trim();
+                        if (query) {
+                            window.location.href = '/search?q=' + encodeURIComponent(query);
+                        }
+                    }
+                });
+            } else {
+                // If it still fails, it will yell at us in the console!
+                console.error("DEBUG: Could not find the search bar ID in the HTML!");
+            }
+        });
+        
         // Custom Navigation wrapper to prevent the Canvas preview iframe from crashing
         function navigate(path) {
             if (window.location.protocol.startsWith('blob')) {
