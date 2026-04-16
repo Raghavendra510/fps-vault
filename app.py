@@ -808,25 +808,35 @@ def get_playlist_videos(playlist_id):
 # ==========================================
 # PLAYLIST HELPER ROUTE
 # ==========================================
+# ==========================================
+# 5. PLAYLIST ROUTER
+# ==========================================
 @app.route('/play/playlist/<int:playlist_id>')
 def start_playlist(playlist_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        # Just grab the first video ID attached to this playlist!
+        # Look for the first video in the playlist
         cursor.execute("SELECT video_id FROM Playlist_Video WHERE playlist_id = %s LIMIT 1", (playlist_id,))
         first_video = cursor.fetchone()
         
         if first_video:
-            # Redirect to the watch page, but attach the playlist ID so the queue opens!
+            # If a video exists, play it normally!
             return redirect(f"/watch/{first_video['video_id']}?list={playlist_id}")
         else:
-            return "Playlist is empty", 404
+            # THE FIX: If empty, pop an alert and bounce them back instantly!
+            return """
+            <script>
+                alert("⚠️ There are no videos in this playlist yet!");
+                window.history.back();
+            </script>
+            """
     except Exception as e:
         print(f"PLAYLIST START ERROR: {e}")
         return str(e), 500
     finally:
-        cursor.close(); conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 # ==========================================
 # TICKETING & REPORTING APIs
@@ -923,7 +933,7 @@ def resolve_ticket(ticket_id):
     resolution = data.get('resolution_description')
     
     if not resolution:
-        return jsonify({"error": "Please provide a resolution description"}), 400
+        return jsonify({"error": "Please provide a resolution description"}), 400   
         
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -932,7 +942,7 @@ def resolve_ticket(ticket_id):
         cursor.execute("""
             UPDATE Ticket 
             SET status = 'resolved', 
-                resolution_description = %s, 
+                resolution_description = %s,    
                 admin_id = %s 
             WHERE ticket_id = %s
         """, (resolution, session['admin_id'], ticket_id))
@@ -954,17 +964,44 @@ def resolve_ticket(ticket_id):
 def search_page():
     return render_template('search.html')
 
-# 2. This route handles the fuzzy AI brain logic
+# ==========================================
+# 4. SEARCH ENGINE (WITH HASHTAGS!)
+# ==========================================
 @app.route('/api/search', methods=['GET'])
 def api_search():
     q = request.args.get('q', '').strip().lower() 
-    
-    if not q:
-        return jsonify([]), 200
+    if not q: return jsonify([]), 200
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     try:
+        # --- NEW: HASHTAG DETECTOR ---
+        if q.startswith('#'):
+            tag_name = q[1:].strip() # Strip off the '#' so we just search the word
+            
+            # Assuming you have a Tag and Video_Tag junction table just like Playlists!
+            cursor.execute("""
+                SELECT v.video_id, v.title, v.thumbnail_url, v.views_count, 
+                       DATE_FORMAT(v.upload_date, '%M %d, %Y') as date,
+                       c.channel_name, c.channel_id,
+                       (SELECT COUNT(*) FROM Like_Table WHERE video_id = v.video_id) as likes_cnt
+                FROM Video v
+                JOIN Channel c ON v.channel_id = c.channel_id
+                JOIN Video_Tag vt ON v.video_id = vt.video_id
+                JOIN Tag t ON vt.tag_id = t.tag_id
+                WHERE t.tag_name = %s
+                ORDER BY v.views_count DESC LIMIT 100
+            """, (tag_name,))
+            
+            results = cursor.fetchall()
+            
+            # Artificial score so the frontend renders them normally
+            for r in results: 
+                r['match_score'] = 100 
+                
+            return jsonify(results), 200
+
+        # --- NORMAL FUZZY SEARCH (Runs if there is no #) ---
         cursor.execute("""
             SELECT v.video_id, v.title, v.thumbnail_url, v.views_count, 
                    DATE_FORMAT(v.upload_date, '%M %d, %Y') as date,
@@ -972,17 +1009,13 @@ def api_search():
                    (SELECT COUNT(*) FROM Like_Table WHERE video_id = v.video_id) as likes_cnt
             FROM Video v
             JOIN Channel c ON v.channel_id = c.channel_id
-            ORDER BY v.views_count DESC
-            LIMIT 300
+            ORDER BY v.views_count DESC LIMIT 300
         """)
         all_videos = cursor.fetchall()
         
         results = []
         for v in all_videos:
-            title_score = fuzz.partial_ratio(q, v['title'].lower())
-            channel_score = fuzz.partial_ratio(q, v['channel_name'].lower())
-            best_score = max(title_score, channel_score)
-            
+            best_score = max(fuzz.partial_ratio(q, v['title'].lower()), fuzz.partial_ratio(q, v['channel_name'].lower()))
             if best_score >= 60:
                 v['match_score'] = best_score 
                 results.append(v)
@@ -991,10 +1024,11 @@ def api_search():
         return jsonify(results), 200
         
     except Exception as e:
-        print(f"FUZZY SEARCH ERROR: {e}")
+        print(f"SEARCH ERROR: {e}")
         return jsonify({"error": str(e)}), 500
     finally:
-        cursor.close(); conn.close()
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 if __name__ == '__main__':
     print("FPS-VAULT Offline Server Running (No DB required)...")

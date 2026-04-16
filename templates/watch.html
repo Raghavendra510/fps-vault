@@ -353,8 +353,8 @@
                 </div>
 
                 <div class="video-info">
-                    <div class="video-tags" id="v-tags"></div>
-                    <h1 class="video-title" id="v-title">Title</h1>
+                    <div id="video-tags-container" style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;"></div>
+                    <h1 class="video-title" id="v-title">Loading Title...</h1>
 
                     <div class="stats-row">
                         <div class="views-date"><span id="v-views">0</span> views • <span id="v-date">Date</span></div>
@@ -508,27 +508,12 @@
                 }
                 iframe.src = embedUrl;
 
-                // --- 2. SET THE THUMBNAIL POSTER ---
-                let posterUrl = data.thumbnail_url;
-                if (posterUrl) {
-                    if (posterUrl.includes('drive.google.com/file/d/')) {
-                        const match = posterUrl.match(/\/d\/(.*?)\//);
-                        if (match && match[1]) posterUrl = `/api/proxy_thumb/${match[1]}`;
-                    } else if (posterUrl.includes('drive.google.com/uc')) {
-                        const match = posterUrl.match(/id=(.*?)(&|$)/);
-                        if (match && match[1]) posterUrl = `/api/proxy_thumb/${match[1]}`;
-                    }
-                    posterDiv.style.backgroundImage = `url('${posterUrl}')`;
-                } else {
-                    posterDiv.style.backgroundColor = '#1a1a1a';
-                }
-
-                // --- 3. CLICK-TO-PLAY ---
-                posterDiv.onclick = () => {
-                    posterDiv.style.display = 'none';
-                    iframe.style.display = 'block';
-                };
-
+                // --- 2. BYPASS POSTER & AUTO-SHOW ---
+                // We instantly hide the fake red play button and show the Google Drive player!
+                posterDiv.style.display = 'none';
+                iframe.style.display = 'block';
+                
+                // (Notice we completely deleted the old Step 3 "CLICK-TO-PLAY" block!)
                 // --- 4. POPULATE METADATA ---
                 document.getElementById('v-title').innerText = data.title;
                 document.getElementById('v-views').innerText = data.views_cnt;
@@ -540,8 +525,36 @@
                 document.getElementById('c-subs').innerText = data.subscriber_cnt;
                 document.getElementById('c-avatar').innerText = data.channel_name.charAt(0).toUpperCase();
 
+                // ... existing title and channel info population ...
+
+                // THE BULLETPROOF TAG INJECTOR
+                const tagsContainer = document.getElementById('video-tags-container');
+
                 if (data.tags && data.tags.length > 0) {
-                    document.getElementById('v-tags').innerText = data.tags.map(t => '#' + t).join(' ');
+                    tagsContainer.innerHTML = ''; // Clear it out just in case
+                    
+                    data.tags.forEach(tag => {
+                        // This handles both simple strings AND objects safely
+                        const tagName = tag.name || tag; 
+                        
+                        const tagLink = document.createElement('a');
+                        
+                        // Encode the '#' symbol so the browser doesn't break the link
+                        tagLink.href = `/search?q=${encodeURIComponent('#' + tagName)}`; 
+                        
+                        tagLink.innerText = `#${tagName}`;
+                        tagLink.style.color = '#e50914'; 
+                        tagLink.style.textDecoration = 'none';
+                        tagLink.style.fontWeight = 'bold';
+                        tagLink.style.fontSize = '14px';
+                        tagLink.style.cursor = 'pointer';
+                        
+                        // Add a cool hover effect
+                        tagLink.onmouseover = () => tagLink.style.color = '#ff4444';
+                        tagLink.onmouseout = () => tagLink.style.color = '#e50914';
+
+                        tagsContainer.appendChild(tagLink);     
+                    });
                 }
 
                 // --- 5. COMMENTS LOGIC ---
