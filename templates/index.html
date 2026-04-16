@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,186 +12,450 @@
         :root {
             --bg-color: #08080a;
             --nav-bg: rgba(8, 8, 10, 0.85);
-            --primary: #e50914; 
+            --primary: #e50914;
             --text-light: #f5f5f5;
             --text-muted: #888;
             --card-bg: #141414;
         }
 
-        body, html { 
-            margin: 0; padding: 0; 
-            background-color: var(--bg-color); 
-            color: var(--text-light); 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             user-select: none;
             overflow-y: auto;
             overflow-x: hidden;
             scroll-behavior: smooth;
         }
-        
+
         nav {
-            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
             background: var(--nav-bg);
             backdrop-filter: blur(10px);
             z-index: 100;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 40px; box-sizing: border-box;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            box-sizing: border-box;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .logo { 
-            font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 4px; 
-            text-decoration: none; cursor: pointer; font-style: italic;
+
+        .logo {
+            font-size: 26px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            font-style: italic;
             text-shadow: 0 0 10px var(--primary), 3px 3px 0px #550000;
             transition: transform 0.3s ease, text-shadow 0.3s ease;
         }
-        .logo span { color: var(--primary); text-shadow: 3px 3px 0px #222; }
-        .logo:hover { transform: scale(1.05) skewX(-5deg); text-shadow: 0 0 20px var(--primary), 4px 4px 0px #550000; }
-        
-        .search-container { flex: 1; display: flex; justify-content: center; padding: 0 40px; }
+
+        .logo span {
+            color: var(--primary);
+            text-shadow: 3px 3px 0px #222;
+        }
+
+        .logo:hover {
+            transform: scale(1.05) skewX(-5deg);
+            text-shadow: 0 0 20px var(--primary), 4px 4px 0px #550000;
+        }
+
+        .search-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 0 40px;
+        }
+
         .search-bar {
-            width: 100%; max-width: 500px; padding: 12px 25px;
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 30px; color: white; outline: none; font-size: 14px;
+            width: 100%;
+            max-width: 650px;
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            color: white;
+            outline: none;
+            font-size: 14px;
             transition: border-color 0.3s, background 0.3s;
         }
-        .search-bar:focus { border-color: var(--primary); background: rgba(0,0,0,0.8); }
 
-        .nav-links { display: flex; gap: 25px; align-items: center; }
-        .nav-links a { color: var(--text-light); text-decoration: none; font-size: 18px; transition: color 0.2s; cursor: pointer; }
-        .nav-links a:hover { color: var(--primary); }
-        .profile-btn { width: 35px; height: 35px; border-radius: 50%; background: #333; cursor: pointer; border: 2px solid transparent; transition: 0.2s;}
-        .profile-btn:hover { border-color: var(--primary); }
+        .search-bar:focus {
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.8);
+        }
 
-        #hero-section { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
-        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; cursor: grab; }
-        #canvas-container:active { cursor: grabbing; }
-        #ui-layer { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
-        .interactive { pointer-events: auto; }
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 18px;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .profile-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #333;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+
+        .profile-btn:hover {
+            border-color: var(--primary);
+        }
+
+        #hero-section {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: grab;
+        }
+
+        #canvas-container:active {
+            cursor: grabbing;
+        }
+
+        #ui-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .interactive {
+            pointer-events: auto;
+        }
 
         #wheel-container {
-            position: absolute; top: 50%; left: 0;
+            position: absolute;
+            top: 50%;
+            left: 0;
             transform: translate(-50%, -50%) rotate(0deg);
-            width: 500px; height: 500px; border-radius: 50%;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            background: radial-gradient(circle, rgba(20,20,20,0.8) 0%, rgba(8,8,10,0.2) 100%);
-            cursor: grab; backdrop-filter: blur(4px);
+            background: radial-gradient(circle, rgba(20, 20, 20, 0.8) 0%, rgba(8, 8, 10, 0.2) 100%);
+            cursor: grab;
+            backdrop-filter: blur(4px);
         }
-        #wheel-container:active { cursor: grabbing; }
-        
+
+        #wheel-container:active {
+            cursor: grabbing;
+        }
+
         .genre-item {
-            position: absolute; top: 50%; left: 50%;
-            font-size: 12px; font-weight: 600; color: var(--text-muted);
-            padding: 6px 16px; background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; 
-            text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 6px 16px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
             transition: all 0.3s;
         }
-        .genre-item:hover, .genre-item.active-genre { 
-            color: #fff; background: var(--primary); border-color: var(--primary); 
+
+        .genre-item:hover,
+        .genre-item.active-genre {
+            color: #fff;
+            background: var(--primary);
+            border-color: var(--primary);
             box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
         }
 
         #hover-overlay {
-            position: absolute; top: 0; left: 0; transform: translate(-50%, -50%);
-            text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.2s;
-            z-index: 20; background: rgba(0, 0, 0, 0.4); 
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(2px);
-            border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            padding: 25px; box-sizing: border-box; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+            box-sizing: border-box;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-        #hover-title { font-size: 22px; font-weight: 800; color: #fff; margin: 0 0 10px 0; letter-spacing: 0.5px; text-shadow: 0 2px 4px #000; }
-        #hover-desc { 
-            font-size: 13px; color: #ddd; margin: 0; line-height: 1.5; font-weight: 600; word-wrap: break-word; 
-            display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;
+
+        #hover-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            margin: 0 0 10px 0;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px #000;
+        }
+
+        #hover-desc {
+            font-size: 13px;
+            color: #ddd;
+            margin: 0;
+            line-height: 1.5;
+            font-weight: 600;
+            word-wrap: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
             text-shadow: 0 1px 3px #000;
         }
-        #hover-meta { margin-top: 15px; color: var(--primary); font-weight: bold; font-size: 13px; text-shadow: 0 1px 3px #000; }
 
-        #instruction { position: absolute; top: 90px; right: 30px; color: rgba(255,255,255,0.3); font-size: 13px; text-align: right; pointer-events: none; }
+        #hover-meta {
+            margin-top: 15px;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 13px;
+            text-shadow: 0 1px 3px #000;
+        }
 
-        #content-section { padding: 40px; background: var(--bg-color); position: relative; z-index: 20; }
-        .content-row { margin-bottom: 50px; }
-        .content-row h2 { font-size: 20px; margin-bottom: 20px; color: var(--text-light); }
-        .video-slider { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; }
-        .video-slider::-webkit-scrollbar { height: 8px; }
-        .video-slider::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        
-        .video-item { min-width: 320px; width: 320px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; }
+        #instruction {
+            position: absolute;
+            top: 90px;
+            right: 30px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 13px;
+            text-align: right;
+            pointer-events: none;
+        }
+
+        #content-section {
+            padding: 40px;
+            background: var(--bg-color);
+            position: relative;
+            z-index: 20;
+        }
+
+        .content-row {
+            margin-bottom: 50px;
+        }
+
+        .content-row h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--text-light);
+        }
+
+        .video-slider {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+
+        .video-slider::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .video-slider::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        .video-item {
+            min-width: 320px;
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            cursor: pointer;
+        }
+
         .video-thumb {
-            width: 100%; aspect-ratio: 16 / 9; background: var(--card-bg); border-radius: 8px;
-            background-size: cover; background-position: center; border: 1px solid rgba(255,255,255,0.05);
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: var(--card-bg);
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             transition: transform 0.3s, border-color 0.3s;
         }
-        .video-item:hover .video-thumb { transform: scale(1.05); border-color: rgba(255,255,255,0.3); box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
-        
-        .card-content { display: flex; flex-direction: column; gap: 4px; padding: 0 4px; }
-        .card-title { font-size: 16px; font-weight: bold; margin-bottom: 2px; }
-        .card-views { font-size: 13px; color: var(--primary); font-weight: 600;}
-        .card-desc { font-size: 12px; color: #bbb; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;}
-        
+
+        .video-item:hover .video-thumb {
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 0 4px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .card-views {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .card-desc {
+            font-size: 12px;
+            color: #bbb;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
         /* Playlist Specific UI */
         .playlist-thumb {
             position: relative;
-            width: 100%; aspect-ratio: 16 / 9; 
-            background: var(--card-bg); border-radius: 8px;
-            background-size: cover; background-position: center; 
-            border: 1px solid rgba(255,255,255,0.05);
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: var(--card-bg);
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             overflow: hidden;
             transition: transform 0.3s, border-color 0.3s;
         }
-        .playlist-item:hover .playlist-thumb { transform: scale(1.05); border-color: #e50914; box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
-        
-        .playlist-overlay {
-            position: absolute; right: 0; top: 0; bottom: 0; width: 40%;
-            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(2px);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            border-left: 1px solid rgba(255,255,255,0.1);
+
+        .playlist-item:hover .playlist-thumb {
+            transform: scale(1.05);
+            border-color: #e50914;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
         }
-        .playlist-icon-svg { width: 24px; height: 24px; fill: white; margin-bottom: 5px; }
+
+        .playlist-overlay {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 40%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(2px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .playlist-icon-svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
+
 <body>
     <nav>
-        <a href="javascript:void(0)" class="logo" onclick="window.scrollTo(0,0); return false;">FPS<span>-</span>VAULT</a>
-            <input type="text" id="search-input" placeholder="Search live streams, channels, or games...">        
+        <a href="javascript:void(0)" class="logo"
+            onclick="window.scrollTo(0,0); return false;">FPS<span>-</span>VAULT</a>
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-bar"
+                placeholder="Search live streams, channels, or games...">
+        </div>
+        <div class="nav-links">
             <a href="/login" style="color: white; font-weight: bold;">Login</a>
-            <a href="/register" style="background: var(--primary); padding: 5px 15px; border-radius: 4px; color: white;">Sign Up</a>
+            <a href="/register"
+                style="background: var(--primary); padding: 5px 15px; border-radius: 4px; color: white;">Sign Up</a>
         </div>
     </nav>
 
     <div id="hero-section">
         <div id="canvas-container"></div>
         <div id="ui-layer">
-            <div id="instruction"><h3>Drag left edge to rotate genres</h3><p>Drag background to rotate 3D space</p><p>Hover and Click a video to play</p></div>
+            <div id="instruction">
+                <h3>Drag left edge to rotate genres</h3>
+                <p>Drag background to rotate 3D space</p>
+                <p>Hover and Click a video to play</p>
+            </div>
             <div id="hover-overlay">
                 <h1 id="hover-title">Stream Title</h1>
                 <p id="hover-desc">A detailed description of the current stream.</p>
-                <div id="hover-meta">🔴 LIVE • 14.2k Viewers</div>
             </div>
             <div id="wheel-container" class="interactive"></div>
         </div>
     </div>
 
     <div id="content-section">
-        <div class="content-row"><h2>Recommended Live Channels</h2><div class="video-slider" id="random-picks"></div></div>
-        <div class="content-row"><h2>Trending in E-Sports</h2><div class="video-slider" id="trending-now"></div></div>
-        <div class="content-row"><h2>Just Chatting</h2><div class="video-slider" id="scifi-picks"></div></div>
-    </div>
-
-    <div class="content-row">
-        <h2>Featured Playlists</h2>
-        <div class="video-slider" id="featured-playlists"></div>
+        <div class="content-row">
+            <h2>Recommended Channels</h2>
+            <div class="video-slider" id="random-picks"></div>
+        </div>
+        <div class="content-row">
+            <h2>Trending in E-Sports</h2>
+            <div class="video-slider" id="trending-now"></div>
+        </div>
+        <!-- <div class="content-row">
+            <h2>Just Chatting</h2>
+            <div class="video-slider" id="scifi-picks"></div>
+        </div> -->
+        <div class="content-row">
+            <h2>Featured Playlists</h2>
+            <div class="video-slider" id="featured-playlists"></div>
+        </div>
     </div>
 
     <script>
         // --- SEARCH BAR LOGIC (BULLETPROOF VERSION) ---
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('search-input');
-            
+
             if (searchInput) {
-                searchInput.addEventListener('keypress', function(e) {
+                searchInput.addEventListener('keypress', function (e) {
                     if (e.key === 'Enter') {
                         const query = this.value.trim();
                         if (query) {
@@ -203,7 +468,7 @@
                 console.error("DEBUG: Could not find the search bar ID in the HTML!");
             }
         });
-        
+
         // Custom Navigation wrapper to prevent the Canvas preview iframe from crashing
         function navigate(path) {
             if (window.location.protocol.startsWith('blob')) {
@@ -214,7 +479,7 @@
                 document.body.appendChild(msg);
                 setTimeout(() => msg.remove(), 1500);
             } else {
-                window.location.href = path; 
+                window.location.href = path;
             }
         }
 
@@ -258,7 +523,7 @@
             try {
                 const res = await fetch('/api/tags');
                 let dbGenres = await res.json();
-                
+
                 // Fallback just in case your database has no tags yet
                 if (!dbGenres || dbGenres.length === 0) {
                     dbGenres = ["gaming"];
@@ -270,13 +535,13 @@
                     const el = document.createElement('div');
                     el.className = 'genre-item interactive';
                     if (i === 0) el.classList.add('active-genre');
-                    
+
                     // Capitalize the DB tag (e.g., 'gaming' -> 'Gaming')
                     el.innerText = genre.charAt(0).toUpperCase() + genre.slice(1);
-                    
+
                     const angle = (i / dbGenres.length) * 360;
                     el.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateX(${wheelRadius}px)`;
-                    
+
                     el.onclick = (e) => {
                         document.querySelectorAll('.genre-item').forEach(g => g.classList.remove('active-genre'));
                         el.classList.add('active-genre');
@@ -288,12 +553,12 @@
                 console.error("Failed to load genres:", e);
             }
         }
-        
+
         // Start the process
         initGenres();
 
         const generateCards = (containerId, count) => {
-            
+
         };
 
         generateCards('random-picks', 12);
@@ -305,7 +570,7 @@
 
         const heroRect = document.getElementById('hero-section').getBoundingClientRect();
         const camera = new THREE.PerspectiveCamera(45, heroRect.width / heroRect.height, 0.1, 1000);
-        camera.position.set(0, 0, 45); 
+        camera.position.set(0, 0, 45);
 
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         renderer.setSize(heroRect.width, heroRect.height);
@@ -316,7 +581,7 @@
         scene.add(carouselGroup);
 
         const ringGeo = new THREE.RingGeometry(14.8, 15.2, 128);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.05 });
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0, visible: false });
         const ring = new THREE.Mesh(ringGeo, ringMat);
         ring.rotation.x = Math.PI / 2;
         carouselGroup.add(ring);
@@ -331,7 +596,7 @@
             canvas.width = 400; canvas.height = 600;
             const ctx = canvas.getContext('2d');
             const texture = new THREE.CanvasTexture(canvas);
-            
+
             // Draw a fallback background FIRST
             const grad = ctx.createLinearGradient(0, 0, 0, 600);
             grad.addColorStop(0, `hsl(${hue}, 40%, 15%)`);
@@ -344,22 +609,17 @@
                 ctx.strokeStyle = `rgba(255,255,255,0.15)`;
                 ctx.lineWidth = 4;
                 ctx.strokeRect(2, 2, 396, 596);
-                ctx.fillStyle = '#e50914';
-                ctx.fillRect(20, 20, 80, 30);
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 18px sans-serif';
-                ctx.fillText('LIVE', 60, 42);
                 texture.needsUpdate = true;
             };
 
             // Draw UI instantly so the card is never invisible
-            drawUI(); 
-            
+            drawUI();
+
             if (imageUrl) {
                 const img = new Image();
                 img.crossOrigin = "Anonymous"; // Required for 3D textures
                 img.src = imageUrl;
-                
+
                 img.onload = () => {
                     ctx.drawImage(img, 0, 0, 400, 600);
                     drawUI(); // Redraw UI on top of the loaded image
@@ -375,7 +635,7 @@
         // 2. Universal Link Formatter
         function formatThumbnailUrl(url) {
             if (!url) return 'https://via.placeholder.com/640x360.png?text=No+Thumbnail';
-            
+
             // If it's a standard Google Drive link
             if (url.includes('drive.google.com/file/d/')) {
                 const match = url.match(/\/d\/(.*?)\//);
@@ -402,11 +662,11 @@
 
                 const vCount = feed.length;
                 const dynamicRadius = Math.max(15, vCount * 1.8);
-                
+
                 window.targetCameraZ = dynamicRadius + 17;
                 scene.fog.near = dynamicRadius - 5;
                 scene.fog.far = dynamicRadius * 3;
-                
+
                 // Adjust the glowing floor ring to match the massive circle
                 ring.geometry.dispose();
                 ring.geometry = new THREE.RingGeometry(dynamicRadius - 0.2, dynamicRadius + 0.2, 128);
@@ -415,25 +675,25 @@
                 for (let i = 0; i < vCount; i++) {
                     const video = feed[i];
                     const angle = (i / vCount) * Math.PI * 2;
-                    
+
                     const safeThumbUrl = formatThumbnailUrl(video.thumbnail_url);
 
-                    const mat = new THREE.MeshBasicMaterial({ 
-                        map: createVideoTexture(video.title, i * (360/vCount), safeThumbUrl),
+                    const mat = new THREE.MeshBasicMaterial({
+                        map: createVideoTexture(video.title, i * (360 / vCount), safeThumbUrl),
                         transparent: true, opacity: 0, side: THREE.DoubleSide
                     });
 
                     const plane = new THREE.Mesh(planeGeo, mat);
-                    plane.userData = { 
+                    plane.userData = {
                         id: video.video_id, title: video.title,
                         desc: `By ${video.channel_name}`, views: video.views_count
-                    }; 
+                    };
 
                     plane.position.x = Math.cos(angle) * dynamicRadius;
                     plane.position.z = Math.sin(angle) * dynamicRadius;
                     plane.position.y = 0;
                     plane.rotation.y = -angle + Math.PI / 2;
-                    
+
                     carouselGroup.add(plane);
                     videoPlanes.push(plane);
                 }
@@ -443,12 +703,12 @@
                 function renderRealCards(containerId, videoList) {
                     const container = document.getElementById(containerId);
                     if (!container) return;
-                    container.innerHTML = ''; 
+                    container.innerHTML = '';
 
                     videoList.forEach(video => {
                         const item = document.createElement('div');
                         item.className = 'video-item';
-                        
+
                         const safeThumbUrl = formatThumbnailUrl(video.thumbnail_url);
 
                         item.innerHTML = `
@@ -490,24 +750,26 @@
                 // 3. Update the 3D Cards with real DB data!
                 videoPlanes.forEach((p, i) => {
                     // Use modulo (%) so if you have 3 videos but 20 cards, it loops them without crashing
-                    const video = feed[i % feed.length]; 
+                    const video = feed[i % feed.length];
                     const safeThumbUrl = formatThumbnailUrl(video.thumbnail_url);
 
-                    gsap.to(p.scale, { x: 0.1, y: 0.1, duration: 0.3, ease: "power2.in", onComplete: () => {
-                        
-                        // NEW: Pass the safeThumbUrl so the image actually draws!
-                        p.material.map = createVideoTexture(video.title, Math.random() * 360, safeThumbUrl);
-                        
-                        // Update the hover info with real data
-                        p.userData.id = video.video_id;
-                        p.userData.title = video.title;
-                        p.userData.desc = video.description || `Uploaded by ${video.channel_name}`;
-                        p.userData.views = video.views_count;
-                        
-                        gsap.to(p.scale, { x: 1, y: 1, duration: 0.5, ease: "back.out(1.5)", delay: i * 0.05 });
-                    }});
+                    gsap.to(p.scale, {
+                        x: 0.1, y: 0.1, duration: 0.3, ease: "power2.in", onComplete: () => {
+
+                            // NEW: Pass the safeThumbUrl so the image actually draws!
+                            p.material.map = createVideoTexture(video.title, Math.random() * 360, safeThumbUrl);
+
+                            // Update the hover info with real data
+                            p.userData.id = video.video_id;
+                            p.userData.title = video.title;
+                            p.userData.desc = video.description || `Uploaded by ${video.channel_name}`;
+                            p.userData.views = video.views_count;
+
+                            gsap.to(p.scale, { x: 1, y: 1, duration: 0.5, ease: "back.out(1.5)", delay: i * 0.05 });
+                        }
+                    });
                 });
-                
+
                 triggerRevealAnimation();
             } catch (err) {
                 console.error("Failed to load genre streams:", err);
@@ -516,12 +778,12 @@
 
         let targetCarouselRotY = 0;
         let isDraggingCanvas = false;
-        let canvasDragDistance = 0; 
+        let canvasDragDistance = 0;
         let prevMousePos = { x: 0, y: 0 };
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2(-10, -10);
         const canvasEl = document.getElementById('canvas-container');
-        
+
         canvasEl.addEventListener('mousedown', (e) => {
             isDraggingCanvas = true; canvasDragDistance = 0; prevMousePos = { x: e.clientX, y: e.clientY };
         });
@@ -536,7 +798,7 @@
                     navigate(`/watch/${data.id}`);
                 }
             }
-            isDraggingCanvas = false; isDraggingWheel = false; 
+            isDraggingCanvas = false; isDraggingWheel = false;
         });
 
         window.addEventListener('mousemove', (e) => {
@@ -569,7 +831,7 @@
             if (!hasAnimatedCamera) {
                 hasAnimatedCamera = true;
                 // Grab the dynamic Z distance, or default to 32
-                const finalZ = window.targetCameraZ || 32; 
+                const finalZ = window.targetCameraZ || 32;
                 gsap.to(camera.position, { y: 2, z: finalZ, duration: 2.5, ease: "power3.inOut" });
                 videoPlanes.forEach(p => gsap.to(p.material, { opacity: 1, duration: 2, delay: 0.5 }));
             }
@@ -586,7 +848,6 @@
         const hoverOverlay = document.getElementById('hover-overlay');
         const hoverTitle = document.getElementById('hover-title');
         const hoverDesc = document.getElementById('hover-desc');
-        const hoverMeta = document.getElementById('hover-meta');
         const centerVec = new THREE.Vector3(); const topVec = new THREE.Vector3(); const bottomVec = new THREE.Vector3();
 
         function animate() {
@@ -609,10 +870,10 @@
                 let targetOpacity = hasAnimatedCamera ? THREE.MathUtils.clamp((tempVector.z - 6) / 8, 0.0, 1.0) : p.material.opacity;
 
                 if (p === closestPlane) { targetScale = 1.2; if (p === hoveredObj) { targetScale = 1.4; activeHover = true; hoveredObjRef = p; } }
-                if (hoveredObj && hoveredObj === closestPlane && p !== hoveredObj) targetOpacity *= 0.15; 
+                if (hoveredObj && hoveredObj === closestPlane && p !== hoveredObj) targetOpacity *= 0.15;
 
                 p.scale.lerp(new THREE.Vector3(targetScale, targetScale, 1), 0.1);
-                if(hasAnimatedCamera) p.material.opacity += (targetOpacity - p.material.opacity) * 0.1;
+                if (hasAnimatedCamera) p.material.opacity += (targetOpacity - p.material.opacity) * 0.1;
             });
 
             if (activeHover && hoveredObjRef && !isDraggingCanvas && !isDraggingWheel) {
@@ -620,7 +881,6 @@
                 if (hoverTitle.innerText !== hoveredObjRef.userData.title) {
                     hoverTitle.innerText = hoveredObjRef.userData.title;
                     hoverDesc.innerText = hoveredObjRef.userData.desc;
-                    hoverMeta.innerText = `🔴 LIVE • ${hoveredObjRef.userData.views}`;
                 }
                 hoveredObjRef.getWorldPosition(centerVec); centerVec.project(camera);
                 const rect = document.getElementById('hero-section').getBoundingClientRect();
@@ -629,7 +889,7 @@
                 topVec.set(0, 4.5, 0).applyMatrix4(hoveredObjRef.matrixWorld).project(camera);
                 bottomVec.set(0, -4.5, 0).applyMatrix4(hoveredObjRef.matrixWorld).project(camera);
                 const pHeight = Math.abs(topVec.y - bottomVec.y) * 0.5 * rect.height;
-                hoverOverlay.style.height = `${pHeight}px`; hoverOverlay.style.width = `${pHeight * (6/9)}px`;
+                hoverOverlay.style.height = `${pHeight}px`; hoverOverlay.style.width = `${pHeight * (6 / 9)}px`;
             } else {
                 if (!isDraggingCanvas && !isDraggingWheel) canvasEl.style.cursor = 'grab';
                 hoverOverlay.style.opacity = '0';
@@ -655,7 +915,7 @@
                 playlists.forEach(p => {
                     const item = document.createElement('div');
                     item.className = 'video-item playlist-item'; // We reuse the video-item sizing!
-                    
+
                     const safeThumbUrl = formatThumbnailUrl(p.thumbnail_url);
 
                     item.innerHTML = `
@@ -685,4 +945,5 @@
         loadFeaturedPlaylists();
     </script>
 </body>
+
 </html>
